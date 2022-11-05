@@ -17,7 +17,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from wing import FAN
+from .wing import FAN
 
 
 class ResBlk(nn.Module):

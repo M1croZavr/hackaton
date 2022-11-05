@@ -113,7 +113,8 @@ class Solver(nn.Module):
             self._reset_grad()
             g_loss.backward()
             optims.generator.step()
-
+            optims.style_encoder.step()
+            
             # Compute moving average models parameters (interpolate)
             moving_average(nets.generator, nets_ema.generator, beta=0.999)
 

@@ -266,20 +266,17 @@ class Discriminator(nn.Module):
 
 def build_model(args):
     generator = Generator(args.img_size, args.style_dim, w_hpf=args.w_hpf)
-    generator.load_state_dict(
-        torch.load(
-            pathlib.Path('./StarGAN/hackaton/stargan-v2-experiments/checkpoints/095000_nets.ckpt'), map_location=DEVICE
-            )['generator']
-        )
     style_encoder = StyleEncoder(args.img_size, args.style_dim, 3)
     style_encoder.load_state_dict(
         torch.load(
-            pathlib.Path('./StarGAN/hackaton/TripletsEncoderGAN-experiments/checkpoints/triplets_encoder.pth'), map_location=DEVICE
+            pathlib.Path('./hackaton/TripletsEncoderGAN-experiments/checkpoints2/triplets_encoder.pth'), map_location=DEVICE
             )
         )
-    # Pretrained encoder is freezed during GAN training
+    # Pretrained encoder is (freezed) during GAN training
     for style_encoder_param in style_encoder.parameters():
-        style_encoder_param.requires_grad = False
+        style_encoder_param.requires_grad = True
+    for generator_param in generator.parameters():
+        generator_param.requires_grad = True
     discriminator = Discriminator(args.img_size, num_domains=3)
 
     generator.to(DEVICE)

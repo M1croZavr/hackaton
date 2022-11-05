@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # weight for objective functions
     parser.add_argument('--lambda_reg', type=float, default=1,
                         help='Weight for R1 regularization')
-    parser.add_argument('--lambda_cyc', type=float, default=1.5,
+    parser.add_argument('--lambda_cyc', type=float, default=1,
                         help='Weight for cyclic consistency loss')
     parser.add_argument('--lambda_sty', type=float, default=1,
                         help='Weight for style reconstruction loss')
@@ -126,15 +126,15 @@ if __name__ == '__main__':
                         help='Seed for random number generator')
 
     # directory for training
-    parser.add_argument('--train_source_img_dir', type=str, default='./StarGAN/hackaton/TripletsEncoderGAN-experiments/dataset/train/source',
+    parser.add_argument('--train_source_img_dir', type=str, default='./hackaton/TripletsEncoderGAN-experiments/dataset/train/source',
                         help='Directory containing training source images')
-    parser.add_argument('--train_reference_img_dir', type=str, default='./StarGAN/hackaton/TripletsEncoderGAN-experiments/dataset/train/reference',
+    parser.add_argument('--train_reference_img_dir', type=str, default='./hackaton/TripletsEncoderGAN-experiments/dataset/train/reference',
                         help='Directory containing training reference images')
     parser.add_argument('--val_img_dir', type=str, default='/home/natitov/hack_lct/timothy/StarGAN/hackaton/stargan-v2-experiments/dataset/val',
                         help='Directory containing validation images')
-    parser.add_argument('--sample_dir', type=str, default='./StarGAN/hackaton/TripletsEncoderGAN-experiments/samples',
+    parser.add_argument('--sample_dir', type=str, default='./hackaton/TripletsEncoderGAN-experiments/samples',
                         help='Directory for saving generated images')
-    parser.add_argument('--checkpoint_dir', type=str, default='./StarGAN/hackaton/TripletsEncoderGAN-experiments/checkpoints',
+    parser.add_argument('--checkpoint_dir', type=str, default='./hackaton/TripletsEncoderGAN-experiments/checkpoints',
                         help='Directory for saving network checkpoints')
 
     # directory for calculating metrics
