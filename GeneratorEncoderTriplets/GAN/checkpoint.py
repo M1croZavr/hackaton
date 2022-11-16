@@ -46,7 +46,8 @@ class CheckpointIO():
             module_dict = torch.load(fname, map_location=torch.device('cpu'))
             
         for name, module in self.module_dict.items():
-            if self.data_parallel:
-                module.module.load_state_dict(module_dict[name])
-            else:
-                module.load_state_dict(module_dict[name])
+            if name != "style_encoder":
+                if self.data_parallel:
+                    module.module.load_state_dict(module_dict[name])
+                else:
+                    module.load_state_dict(module_dict[name])

@@ -17,6 +17,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import models
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -260,24 +261,28 @@ class Discriminator(nn.Module):
         out = out.view(out.shape[0], -1)  # (batch, num_domains)
         idx = torch.LongTensor(range(y.shape[0])).to(y.device)
         out = out[idx, y]  # (batch)
-        # out = torch.sigmoid(out)
+        out = torch.sigmoid(out)
         return out
 
 
 def build_model(args):
     generator = Generator(args.img_size, args.style_dim, w_hpf=args.w_hpf)
-    style_encoder = StyleEncoder(args.img_size, args.style_dim, 3)
-    style_encoder.load_state_dict(
-        torch.load(
-            pathlib.Path('./hackaton/TripletsEncoderGAN-experiments/checkpoints2/triplets_encoder.pth'), map_location=DEVICE
-            )
-        )
-    # Pretrained encoder is (freezed) during GAN training
-    for style_encoder_param in style_encoder.parameters():
-        style_encoder_param.requires_grad = True
-    for generator_param in generator.parameters():
-        generator_param.requires_grad = True
     discriminator = Discriminator(args.img_size, num_domains=3)
+    # style_encoder = StyleEncoder(args.img_size, args.style_dim, 3)
+    style_encoder = models.resnet50()
+    # fc_in_features = style_encoder.fc.in_features
+    # style_encoder.fc = nn.Linear(in_features=fc_in_features, out_features=64)
+    # style_encoder.load_state_dict(
+    #     torch.load(
+    #         pathlib.Path('./hackaton/TripletsEncoderGAN-experiments/checkpoints/triplets_encoder_resnet50.pth'), map_location=DEVICE
+    #         )
+    #     )
+    # # Pretrained encoder is (freezed) during GAN training
+    # for style_encoder_param in style_encoder.parameters():
+    #     style_encoder_param.requires_grad = False
+    # for generator_param in generator.parameters():
+    #     generator_param.requires_grad = True
+
 
     generator.to(DEVICE)
     style_encoder.to(DEVICE)

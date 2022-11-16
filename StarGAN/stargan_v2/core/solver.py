@@ -19,11 +19,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from model import build_model
-from checkpoint import CheckpointIO
-from data_loader import InputFetcher
-import utils as utils
-from metrics.eval import calculate_metrics
+from .model import build_model
+from .checkpoint import CheckpointIO
+from .data_loader import InputFetcher
+from . import utils
+# from ..metrics.eval import calculate_metrics
 
 
 class Solver(nn.Module):
@@ -103,16 +103,16 @@ class Solver(nn.Module):
             inputs = next(fetcher)
             x_real, y_org = inputs.x_src, inputs.y_src
             x_ref, x_ref2, y_trg = inputs.x_ref, inputs.x_ref2, inputs.y_ref
-            z_trg, z_trg2 = inputs.z_trg, inputs.z_trg2
+            # z_trg, z_trg2 = inputs.z_trg, inputs.z_trg2
 
             masks = None  # nets.fan.get_heatmap(x_real) if args.w_hpf > 0 else None
 
             # train the discriminator
-            d_loss, d_losses_latent = compute_d_loss(
-                nets, args, x_real, y_org, y_trg, z_trg=z_trg, masks=masks)
-            self._reset_grad()
-            d_loss.backward()
-            optims.discriminator.step()
+            # d_loss, d_losses_latent = compute_d_loss(
+            #     nets, args, x_real, y_org, y_trg, masks=masks)
+            # self._reset_grad()
+            # d_loss.backward()
+            # optims.discriminator.step()
 
             d_loss, d_losses_ref = compute_d_loss(
                 nets, args, x_real, y_org, y_trg, x_ref=x_ref, masks=masks)
@@ -120,14 +120,14 @@ class Solver(nn.Module):
             d_loss.backward()
             optims.discriminator.step()
 
-            # train the generator
-            g_loss, g_losses_latent = compute_g_loss(
-                nets, args, x_real, y_org, y_trg, z_trgs=[z_trg, z_trg2], masks=masks)
-            self._reset_grad()
-            g_loss.backward()
-            optims.generator.step()
-            optims.mapping_network.step()
-            optims.style_encoder.step()
+            # # train the generator
+            # g_loss, g_losses_latent = compute_g_loss(
+            #     nets, args, x_real, y_org, y_trg, z_trgs=[z_trg, z_trg2], masks=masks)
+            # self._reset_grad()
+            # g_loss.backward()
+            # optims.generator.step()
+            # optims.mapping_network.step()
+            # optims.style_encoder.step()
 
             g_loss, g_losses_ref = compute_g_loss(
                 nets, args, x_real, y_org, y_trg, x_refs=[x_ref, x_ref2], masks=masks)
@@ -137,7 +137,7 @@ class Solver(nn.Module):
 
             # compute moving average of network parameters
             moving_average(nets.generator, nets_ema.generator, beta=0.999)
-            moving_average(nets.mapping_network, nets_ema.mapping_network, beta=0.999)
+            # moving_average(nets.mapping_network, nets_ema.mapping_network, beta=0.999)
             moving_average(nets.style_encoder, nets_ema.style_encoder, beta=0.999)
 
             # decay weight for diversity sensitive loss
@@ -150,8 +150,8 @@ class Solver(nn.Module):
                 elapsed = str(datetime.timedelta(seconds=elapsed))[:-7]
                 log = "Elapsed time [%s], Iteration [%i/%i], " % (elapsed, i+1, args.total_iters)
                 all_losses = dict()
-                for loss, prefix in zip([d_losses_latent, d_losses_ref, g_losses_latent, g_losses_ref],
-                                        ['D/latent_', 'D/ref_', 'G/latent_', 'G/ref_']):
+                for loss, prefix in zip([d_losses_ref, g_losses_ref],
+                                        ['D/ref_', 'G/ref_']):
                     for key, value in loss.items():
                         all_losses[prefix + key] = value
                 all_losses['G/lambda_ds'] = args.lambda_ds
@@ -200,8 +200,7 @@ class Solver(nn.Module):
         calculate_metrics(nets_ema, args, step=resume_iter, mode='reference')
 
 
-def compute_d_loss(nets, args, x_real, y_org, y_trg, z_trg=None, x_ref=None, masks=None):
-    assert (z_trg is None) != (x_ref is None)
+def compute_d_loss(nets, args, x_real, y_org, y_trg, x_ref=None, masks=None):
     # with real images
     x_real.requires_grad_()
     out = nets.discriminator(x_real, y_org)
@@ -210,11 +209,7 @@ def compute_d_loss(nets, args, x_real, y_org, y_trg, z_trg=None, x_ref=None, mas
 
     # with fake images
     with torch.no_grad():
-        if z_trg is not None:
-            s_trg = nets.mapping_network(z_trg, y_trg)
-        else:  # x_ref is not None
-            s_trg = nets.style_encoder(x_ref, y_trg)
-
+        s_trg = nets.style_encoder(x_ref, y_trg)
         x_fake = nets.generator(x_real, s_trg, masks=masks)
     out = nets.discriminator(x_fake, y_trg)
     loss_fake = adv_loss(out, 0)
@@ -225,19 +220,12 @@ def compute_d_loss(nets, args, x_real, y_org, y_trg, z_trg=None, x_ref=None, mas
                        reg=loss_reg.item())
 
 
-def compute_g_loss(nets, args, x_real, y_org, y_trg, z_trgs=None, x_refs=None, masks=None):
-    assert (z_trgs is None) != (x_refs is None)
-    if z_trgs is not None:
-        z_trg, z_trg2 = z_trgs
+def compute_g_loss(nets, args, x_real, y_org, y_trg, x_refs=None, masks=None):
     if x_refs is not None:
         x_ref, x_ref2 = x_refs
 
     # adversarial loss
-    if z_trgs is not None:
-        s_trg = nets.mapping_network(z_trg, y_trg)
-    else:
-        s_trg = nets.style_encoder(x_ref, y_trg)
-
+    s_trg = nets.style_encoder(x_ref, y_trg)
     x_fake = nets.generator(x_real, s_trg, masks=masks)
     out = nets.discriminator(x_fake, y_trg)
     loss_adv = adv_loss(out, 1)
@@ -247,10 +235,7 @@ def compute_g_loss(nets, args, x_real, y_org, y_trg, z_trgs=None, x_refs=None, m
     loss_sty = torch.mean(torch.abs(s_pred - s_trg))
 
     # diversity sensitive loss
-    if z_trgs is not None:
-        s_trg2 = nets.mapping_network(z_trg2, y_trg)
-    else:
-        s_trg2 = nets.style_encoder(x_ref2, y_trg)
+    s_trg2 = nets.style_encoder(x_ref2, y_trg)
     x_fake2 = nets.generator(x_real, s_trg2, masks=masks)
     x_fake2 = x_fake2.detach()
     loss_ds = torch.mean(torch.abs(x_fake - x_fake2))

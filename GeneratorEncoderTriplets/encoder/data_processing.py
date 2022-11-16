@@ -1,4 +1,4 @@
-from torch.utils.data import Dataset, DataLoader, sampler
+from torch.utils.data import Dataset, sampler
 import pathlib
 import os
 from PIL import Image

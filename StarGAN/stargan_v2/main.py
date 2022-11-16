@@ -98,7 +98,7 @@ if __name__ == '__main__':
     # weight for objective functions
     parser.add_argument('--lambda_reg', type=float, default=1,
                         help='Weight for R1 regularization')
-    parser.add_argument('--lambda_cyc', type=float, default=2,
+    parser.add_argument('--lambda_cyc', type=float, default=1,
                         help='Weight for cyclic consistency loss')
     parser.add_argument('--lambda_sty', type=float, default=1,
                         help='Weight for style reconstruction loss')
@@ -120,7 +120,7 @@ if __name__ == '__main__':
                         help='Batch size for training')
     parser.add_argument('--val_batch_size', type=int, default=32,
                         help='Batch size for validation')
-    parser.add_argument('--lr', type=float, default=1e-4,
+    parser.add_argument('--lr', type=float, default=0.0001,
                         help='Learning rate for D, E and G')
     parser.add_argument('--f_lr', type=float, default=1e-6,
                         help='Learning rate for F')
@@ -143,13 +143,13 @@ if __name__ == '__main__':
                         help='Seed for random number generator')
 
     # directory for training
-    parser.add_argument('--train_img_dir', type=str, default='data/celeba_hq/train',
+    parser.add_argument('--train_img_dir', type=str, default='./hackaton/TripletsEncoderGAN-experiments/dataset/train',
                         help='Directory containing training images')
     parser.add_argument('--val_img_dir', type=str, default='data/celeba_hq/val',
                         help='Directory containing validation images')
     parser.add_argument('--sample_dir', type=str, default='expr/samples',
                         help='Directory for saving generated images')
-    parser.add_argument('--checkpoint_dir', type=str, default='expr/checkpoints',
+    parser.add_argument('--checkpoint_dir', type=str, default='./hackaton/stargan-v2-experiments/new_checkpoints',
                         help='Directory for saving network checkpoints')
 
     # directory for calculating metrics
@@ -174,9 +174,9 @@ if __name__ == '__main__':
 
     # step size
     parser.add_argument('--print_every', type=int, default=50)
-    parser.add_argument('--sample_every', type=int, default=5000)
+    parser.add_argument('--sample_every', type=int, default=10000000)
     parser.add_argument('--save_every', type=int, default=5000)
-    parser.add_argument('--eval_every', type=int, default=50000)
+    parser.add_argument('--eval_every', type=int, default=500000)
 
     args = parser.parse_args()
     main(args)

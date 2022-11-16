@@ -185,7 +185,7 @@ class InputFetcher:
     def __next__(self):
         x, y = self._fetch_inputs()
         # Source classes normal=2
-        y.fill_(2)
+        y += 2
         if self.mode == 'train':
             x_ref, y_ref = self._fetch_refs()
             # References classes cancer=0 covid=1

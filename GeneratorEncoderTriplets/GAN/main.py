@@ -134,7 +134,7 @@ if __name__ == '__main__':
                         help='Directory containing validation images')
     parser.add_argument('--sample_dir', type=str, default='./hackaton/TripletsEncoderGAN-experiments/samples',
                         help='Directory for saving generated images')
-    parser.add_argument('--checkpoint_dir', type=str, default='./hackaton/TripletsEncoderGAN-experiments/checkpoints',
+    parser.add_argument('--checkpoint_dir', type=str, default='./hackaton/TripletsEncoderGAN-experiments/checkpoints4',
                         help='Directory for saving network checkpoints')
 
     # directory for calculating metrics

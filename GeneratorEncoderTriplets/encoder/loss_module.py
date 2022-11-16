@@ -44,7 +44,7 @@ class EPHNLoss(Module):
         N = Lvec.shape[0]
         # Normalize each vector by its euclidean(p=2) norm
         fvec_norm = F.normalize(fvec, p=2, dim=1)
-        # Same indexes mask, Not same indexes mask
+        # Same domains mask, Not same domains mask
         Same, Diff = Mat(Lvec.view(-1))
         
         # Similarity Matrix (Matrix n x n of scalar product)
